@@ -71,6 +71,9 @@ public final class Main {
 
         //TODO add here the entry point to your implementation
 
+//        System.out.println(inputData.getPlayerOneDecks().getNrCardsInDeck());
+        new Gameplay(inputData, output).gameRules();
+
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         objectWriter.writeValue(new File(filePath2), output);
     }
