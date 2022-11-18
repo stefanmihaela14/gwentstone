@@ -2,11 +2,14 @@ package main;
 
 import fileio.CardInput;
 
-public class MyCard {
+public abstract class MyCard {
     protected CardInput card;
 
     public MyCard(CardInput card){
         this.card = card;
     }
 
+    public CardInput getCard() {
+        return card;
+    }
 }

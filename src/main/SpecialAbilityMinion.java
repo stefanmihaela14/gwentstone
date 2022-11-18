@@ -9,17 +9,17 @@ public class SpecialAbilityMinion extends Minion{
     }
 
 
-    public void which_ability(){
-        if(card.getName().equals("The Ripper")){
+    public void which_ability() {
+        if(card.getName().equals("The Ripper")) {
 
         }
-        if(card.getName().equals("Miraj")){
+        if(card.getName().equals("Miraj")) {
 
         }
         if(card.getName().equals("The Cursed One")) {
 
         }
-        if(card.getName().equals("Disciple")){
+        if(card.getName().equals("Disciple")) {
 
         }
 
