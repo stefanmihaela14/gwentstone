@@ -93,38 +93,91 @@ public class Table {
         }
     }
 
-    public void putCardOnTable(int indexCard, int whichPlayer) {
-        if(whichPlayer == 1) {
-            MyCard temporaryCard1 = handPlayer1.remove(indexCard);
-            if (temporaryCard1.getCard().getName().equals("The Ripper") ||
-                    temporaryCard1.getCard().getName().equals("Miraj") ||
-                    temporaryCard1.getCard().getName().equals("Goliath") ||
-                    temporaryCard1.getCard().getName().equals("Warden")) {
-                vectorRows[2].add(temporaryCard1);
-            }
-            if (temporaryCard1.getCard().getName().equals("Sentinel") ||
-                    temporaryCard1.getCard().getName().equals("Berserker") ||
-                    temporaryCard1.getCard().getName().equals("The Cursed One") ||
-                    temporaryCard1.getCard().getName().equals("Disciple")) {
-                vectorRows[3].add(temporaryCard1);
+    public int putCardOnTable(int indexCard, int whichPlayer) {
+        if (whichPlayer == 1) {
+            if (!handPlayer1.isEmpty() && indexCard + 1 <= handPlayer1.size()) {
+                MyCard temporaryCard1 = handPlayer1.remove(indexCard);
+                if (temporaryCard1.getCard().getName().equals("The Ripper") ||
+                        temporaryCard1.getCard().getName().equals("Miraj") ||
+                        temporaryCard1.getCard().getName().equals("Goliath") ||
+                        temporaryCard1.getCard().getName().equals("Warden")) {
+                    if (Gameplay.getInstance().getPlayer1().getMana() < temporaryCard1.getCard().getMana()) {
+                        return 2;
+                    }
+
+                    if (vectorRows[2].size() < 5) {
+                        Gameplay.getInstance().getPlayer1().depleteMana(temporaryCard1.getCard().getMana());
+                        vectorRows[2].add(temporaryCard1);
+                    }
+                    else{
+                        return 3;
+                    }
+                }
+                else if (temporaryCard1.getCard().getName().equals("Sentinel") ||
+                        temporaryCard1.getCard().getName().equals("Berserker") ||
+                        temporaryCard1.getCard().getName().equals("The Cursed One") ||
+                        temporaryCard1.getCard().getName().equals("Disciple")) {
+                    if (Gameplay.getInstance().getPlayer1().getMana() < temporaryCard1.getCard().getMana()) {
+                        return 2;
+                    }
+
+                    if (vectorRows[3].size() < 5) {
+                        Gameplay.getInstance().getPlayer1().depleteMana(temporaryCard1.getCard().getMana());
+                        vectorRows[3].add(temporaryCard1);
+                    }
+                    else{
+                        return 3;
+                    }
+                }
+                else {
+                    return 1;
+                }
             }
         } else {
-            MyCard temporaryCard2 = handPlayer2.remove(indexCard);
-            if (temporaryCard2.getCard().getName().equals("The Ripper") ||
-                    temporaryCard2.getCard().getName().equals("Miraj") ||
-                    temporaryCard2.getCard().getName().equals("Goliath") ||
-                    temporaryCard2.getCard().getName().equals("Warden")) {
-                vectorRows[1].add(temporaryCard2);
-            }
-            if (temporaryCard2.getCard().getName().equals("Sentinel") ||
-                    temporaryCard2.getCard().getName().equals("Berserker") ||
-                    temporaryCard2.getCard().getName().equals("The Cursed One") ||
-                    temporaryCard2.getCard().getName().equals("Disciple")) {
-                vectorRows[0].add(temporaryCard2);
-            }
-        }
-    }
+            if (!handPlayer2.isEmpty() && indexCard + 1 <= handPlayer2.size())
+                {
+                    MyCard temporaryCard2 = handPlayer2.remove(indexCard);
 
+                    if (temporaryCard2.getCard().getName().equals("The Ripper") ||
+                            temporaryCard2.getCard().getName().equals("Miraj") ||
+                            temporaryCard2.getCard().getName().equals("Goliath") ||
+                            temporaryCard2.getCard().getName().equals("Warden")) {
+
+                        if (Gameplay.getInstance().getPlayer2().getMana() < temporaryCard2.getCard().getMana()) {
+                            return 2;
+                        }
+
+                        if (vectorRows[1].size() < 5) {
+                            vectorRows[1].add(temporaryCard2);
+                            Gameplay.getInstance().getPlayer2().depleteMana(temporaryCard2.getCard().getMana());
+                        }
+                        else{
+                            return 3;
+                        }
+                    }
+                    else if (temporaryCard2.getCard().getName().equals("Sentinel") ||
+                            temporaryCard2.getCard().getName().equals("Berserker") ||
+                            temporaryCard2.getCard().getName().equals("The Cursed One") ||
+                            temporaryCard2.getCard().getName().equals("Disciple")) {
+                        if (Gameplay.getInstance().getPlayer2().getMana() < temporaryCard2.getCard().getMana()) {
+                            return 2;
+                        }
+
+                        if (vectorRows[0].size() < 5) {
+                            vectorRows[0].add(temporaryCard2);
+                            Gameplay.getInstance().getPlayer2().depleteMana(temporaryCard2.getCard().getMana());
+                        }
+                        else{
+                            return 3;
+                        }
+                    }
+                    else {
+                        return 1;
+                    }
+                }
+            }
+        return 0;
+    }
 //    Getters and Setters:
     public Hero getHero_1() {
         return hero_1;

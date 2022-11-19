@@ -10,6 +10,10 @@ public class Player {
 
     private int gamesWon = 0;
 
+    public void depleteMana(int mana){
+        this.mana -= mana;
+    }
+
 //    getters and setters
     public int getMana() {
         return mana;
