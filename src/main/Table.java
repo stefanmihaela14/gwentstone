@@ -96,7 +96,7 @@ public class Table {
     public int putCardOnTable(int indexCard, int whichPlayer) {
         if (whichPlayer == 1) {
             if (!handPlayer1.isEmpty() && indexCard + 1 <= handPlayer1.size()) {
-                MyCard temporaryCard1 = handPlayer1.remove(indexCard);
+                MyCard temporaryCard1 = handPlayer1.get(indexCard);
                 if (temporaryCard1.getCard().getName().equals("The Ripper") ||
                         temporaryCard1.getCard().getName().equals("Miraj") ||
                         temporaryCard1.getCard().getName().equals("Goliath") ||
@@ -108,6 +108,8 @@ public class Table {
                     if (vectorRows[2].size() < 5) {
                         Gameplay.getInstance().getPlayer1().depleteMana(temporaryCard1.getCard().getMana());
                         vectorRows[2].add(temporaryCard1);
+                        handPlayer1.remove(indexCard);
+
                     }
                     else{
                         return 3;
@@ -124,6 +126,8 @@ public class Table {
                     if (vectorRows[3].size() < 5) {
                         Gameplay.getInstance().getPlayer1().depleteMana(temporaryCard1.getCard().getMana());
                         vectorRows[3].add(temporaryCard1);
+                        handPlayer1.remove(indexCard);
+
                     }
                     else{
                         return 3;
@@ -136,7 +140,7 @@ public class Table {
         } else {
             if (!handPlayer2.isEmpty() && indexCard + 1 <= handPlayer2.size())
                 {
-                    MyCard temporaryCard2 = handPlayer2.remove(indexCard);
+                    MyCard temporaryCard2 = handPlayer2.get(indexCard);
 
                     if (temporaryCard2.getCard().getName().equals("The Ripper") ||
                             temporaryCard2.getCard().getName().equals("Miraj") ||
@@ -150,6 +154,7 @@ public class Table {
                         if (vectorRows[1].size() < 5) {
                             vectorRows[1].add(temporaryCard2);
                             Gameplay.getInstance().getPlayer2().depleteMana(temporaryCard2.getCard().getMana());
+                            handPlayer2.remove(indexCard);
                         }
                         else{
                             return 3;
@@ -166,6 +171,8 @@ public class Table {
                         if (vectorRows[0].size() < 5) {
                             vectorRows[0].add(temporaryCard2);
                             Gameplay.getInstance().getPlayer2().depleteMana(temporaryCard2.getCard().getMana());
+                            handPlayer2.remove(indexCard);
+
                         }
                         else{
                             return 3;

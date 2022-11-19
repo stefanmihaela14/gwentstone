@@ -304,19 +304,19 @@ public class Gameplay {
             if(output == 1){
                 ObjectNode newNode = output_data.addObject();
                 newNode.put("command", actionsInput.getCommand());
-                newNode.put("playerIdx", actionsInput.getPlayerIdx());
+                newNode.put("handIdx", actionsInput.getHandIdx());
                 newNode.put("error", "Cannot place environment card on table.");
             }
             else if(output == 2){
                 ObjectNode newNode = output_data.addObject();
                 newNode.put("command", actionsInput.getCommand());
-                newNode.put("playerIdx", actionsInput.getPlayerIdx());
+                newNode.put("handIdx", actionsInput.getHandIdx());
                 newNode.put("error", "Not enough mana to place card on table.");
             }
             else if(output == 3){
                 ObjectNode newNode = output_data.addObject();
                 newNode.put("command", actionsInput.getCommand());
-                newNode.put("playerIdx", actionsInput.getPlayerIdx());
+                newNode.put("handIdx", actionsInput.getHandIdx());
                 newNode.put("error", "Cannot place card on table since row is full.");
             }
         }
