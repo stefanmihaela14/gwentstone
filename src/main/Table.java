@@ -1,5 +1,6 @@
 package main;
 
+import fileio.ActionsInput;
 import fileio.CardInput;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class Table {
 
     private ArrayList<MyCard> handPlayer2 = new ArrayList<>();
 
-    private ArrayList<MyCard>[] vectorRows = new ArrayList[4];
+    private ArrayList<Minion>[] vectorRows = new ArrayList[4];
 
 
     public Table() {
@@ -79,7 +80,7 @@ public class Table {
         }
 
         for(int i = 0; i<vectorRows.length; i++) {
-            vectorRows[i] = new ArrayList<MyCard>();
+            vectorRows[i] = new ArrayList<Minion>();
         }
     }
 
@@ -97,6 +98,9 @@ public class Table {
         if (whichPlayer == 1) {
             if (!handPlayer1.isEmpty() && indexCard + 1 <= handPlayer1.size()) {
                 MyCard temporaryCard1 = handPlayer1.get(indexCard);
+                if(!(temporaryCard1 instanceof Minion)){
+                    return 1;
+                }
                 if (temporaryCard1.getCard().getName().equals("The Ripper") ||
                         temporaryCard1.getCard().getName().equals("Miraj") ||
                         temporaryCard1.getCard().getName().equals("Goliath") ||
@@ -107,9 +111,8 @@ public class Table {
 
                     if (vectorRows[2].size() < 5) {
                         Gameplay.getInstance().getPlayer1().depleteMana(temporaryCard1.getCard().getMana());
-                        vectorRows[2].add(temporaryCard1);
+                        vectorRows[2].add((Minion) temporaryCard1);
                         handPlayer1.remove(indexCard);
-
                     }
                     else{
                         return 3;
@@ -125,7 +128,7 @@ public class Table {
 
                     if (vectorRows[3].size() < 5) {
                         Gameplay.getInstance().getPlayer1().depleteMana(temporaryCard1.getCard().getMana());
-                        vectorRows[3].add(temporaryCard1);
+                        vectorRows[3].add((Minion) temporaryCard1);
                         handPlayer1.remove(indexCard);
 
                     }
@@ -141,6 +144,9 @@ public class Table {
             if (!handPlayer2.isEmpty() && indexCard + 1 <= handPlayer2.size())
                 {
                     MyCard temporaryCard2 = handPlayer2.get(indexCard);
+                    if(!(temporaryCard2 instanceof Minion)){
+                        return 1;
+                    }
 
                     if (temporaryCard2.getCard().getName().equals("The Ripper") ||
                             temporaryCard2.getCard().getName().equals("Miraj") ||
@@ -152,7 +158,7 @@ public class Table {
                         }
 
                         if (vectorRows[1].size() < 5) {
-                            vectorRows[1].add(temporaryCard2);
+                            vectorRows[1].add((Minion) temporaryCard2);
                             Gameplay.getInstance().getPlayer2().depleteMana(temporaryCard2.getCard().getMana());
                             handPlayer2.remove(indexCard);
                         }
@@ -169,7 +175,7 @@ public class Table {
                         }
 
                         if (vectorRows[0].size() < 5) {
-                            vectorRows[0].add(temporaryCard2);
+                            vectorRows[0].add((Minion) temporaryCard2);
                             Gameplay.getInstance().getPlayer2().depleteMana(temporaryCard2.getCard().getMana());
                             handPlayer2.remove(indexCard);
 
@@ -185,6 +191,59 @@ public class Table {
             }
         return 0;
     }
+
+    public int useEnvironmentCard(int handIndex, int affectedRow, int whichPlayer) {
+        // get the opposite row
+        int oppositeRow = 3 - affectedRow;
+
+        MyCard envCard;
+        Player newPlayer;
+        ArrayList<MyCard> hand;
+        if(whichPlayer == 1){
+            if(handIndex + 1 > handPlayer1.size()){
+                return -1;
+            }
+            envCard = handPlayer1.get(handIndex);
+            newPlayer = Gameplay.getInstance().getPlayer1();
+            hand = handPlayer1;
+        } else {
+            if(handIndex + 1> handPlayer2.size()){
+                return -1;
+            }
+            envCard = handPlayer2.get(handIndex);
+            newPlayer = Gameplay.getInstance().getPlayer2();
+            hand = handPlayer2;
+        }
+        if(!envCard.isEnvironmentCard()) {
+            return 1; // error : Chosen card is not of type environment.
+        }
+        if((newPlayer.getMana() < envCard.getCard().getMana())) {
+            return 2; // error : Not enough mana to use environment card.
+        }
+        if(whichPlayer == 1) {
+            if(affectedRow == 2 || affectedRow == 3){
+                return 3; // error : Chosen row does not belong to the enemy.
+            }
+        } else {
+            if(affectedRow == 0 || affectedRow == 1){
+                return 3;
+            }
+        }
+        if(envCard.getCard().getName().equals("Heart Hound")){
+            if(!(getVectorRows()[oppositeRow].size() < 5)){
+                return 4; // error : Cannot steal enemy card since the player's row is full.
+            }
+        }
+        if(envCard instanceof Environment){
+            ((Environment) envCard).useAbility(affectedRow);
+        }
+        int manaToRemove = envCard.getCard().getMana();
+        int playerMana = newPlayer.getMana();
+        newPlayer.setMana(playerMana - manaToRemove);
+        hand.remove(handIndex);
+        return 0;
+    }
+
 //    Getters and Setters:
     public Hero getHero_1() {
         return hero_1;
@@ -226,11 +285,11 @@ public class Table {
         handPlayer2 = hand;
     }
 
-    public ArrayList<MyCard>[] getVectorRows() {
+    public ArrayList<Minion>[] getVectorRows() {
         return vectorRows;
     }
 
-    public void setVectorRows(ArrayList<MyCard>[] vectorRows) {
+    public void setVectorRows(ArrayList<Minion>[] vectorRows) {
         this.vectorRows = vectorRows;
     }
 }

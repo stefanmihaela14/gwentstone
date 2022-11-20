@@ -8,7 +8,6 @@ public class SpecialAbilityMinion extends Minion{
         super(card);
     }
 
-
     public void which_ability() {
         if(card.getName().equals("The Ripper")) {
 

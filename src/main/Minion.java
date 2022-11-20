@@ -4,16 +4,31 @@ import fileio.CardInput;
 
 public class Minion extends MyCard{
 
+    protected int health = 0;
+
     public Minion(CardInput card) {
         super(card);
+        this.health = card.getHealth();
     }
 
-    protected int is_frozen = 0; // not frozen on 0, frozen on 1
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    @Override
+    public boolean isEnvironmentCard() {
+        return false;
+    }
 
     protected int attacked_once_this_round = 0; // after it attacks becomes 1
     public void MinionRules(){
 
     }
+
 
     public int getAttacked_once_this_round() {
         return attacked_once_this_round;
@@ -23,11 +38,4 @@ public class Minion extends MyCard{
         this.attacked_once_this_round = attacked_once_this_round;
     }
 
-    public int getIs_frozen() {
-        return is_frozen;
-    }
-
-    public void setIs_frozen(int is_frozen) {
-        this.is_frozen = is_frozen;
-    }
 }

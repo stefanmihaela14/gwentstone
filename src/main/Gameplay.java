@@ -7,6 +7,7 @@ import fileio.CardInput;
 import fileio.Input;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
@@ -44,6 +45,12 @@ public class Gameplay {
     private Table table;
 
 // Getters and Setters
+
+
+    public Table getTable() {
+        return table;
+    }
+
     public int getNumber() {
         return number_of_games;
     }
@@ -183,6 +190,8 @@ public class Gameplay {
                 handIndex = input_data.getGames().get(i).getActions().get(j).getHandIdx();
 
                 doActions(input_data.getGames().get(i).getActions().get(j));
+
+                deleteDeadCards();
             }
         }
     }
@@ -322,7 +331,6 @@ public class Gameplay {
         }
         if(actionsInput.getCommand().equals("getCardsOnTable")) {
             ObjectNode newNode = output_data.addObject();
-            int whichPlayer = actionsInput.getPlayerIdx();
             newNode.put("command", actionsInput.getCommand());
             ArrayNode outputArray = newNode.putArray("output");
             for (int i = 0; i < table.getVectorRows().length; i++){
@@ -331,10 +339,9 @@ public class Gameplay {
                     CardInput tempCard = table.getVectorRows()[i].get(j).getCard();
                     ObjectNode cardNode = lineArray.addObject();
                     cardNode.put("mana", tempCard.getMana());
-                    if(!(table.getVectorRows()[i].get(j) instanceof Environment)) {
-                        cardNode.put("attackDamage", tempCard.getAttackDamage());
-                        cardNode.put("health", tempCard.getHealth());
-                    }
+                    cardNode.put("attackDamage", tempCard.getAttackDamage());
+                    cardNode.put("health", table.getVectorRows()[i].get(j).getHealth());
+
                     cardNode.put("description", tempCard.getDescription());
                     ArrayNode colorsArray = cardNode.putArray("colors");
                     for(int k = 0; k < tempCard.getColors().size(); k++) {
@@ -344,7 +351,7 @@ public class Gameplay {
                 }
             }
         }
-        if(actionsInput.getCommand().equals("getEnvironmentCardsInHand")){
+        if(actionsInput.getCommand().equals("getEnvironmentCardsInHand")){ //this should work
             ObjectNode newNode = output_data.addObject();
             int whichPlayer = actionsInput.getPlayerIdx();
             newNode.put("command", actionsInput.getCommand());
@@ -356,17 +363,11 @@ public class Gameplay {
             } else {
                 hand = table.getHandPlayer2();
             }
-            for(int i = 0; i < hand.size(); i++) {
-                if (!((hand.get(i)) instanceof  Environment)){
-                    newNode.put("error", "Chosen card is not of type environment.");
-                } else {
-                    CardInput tempHandCard = hand.get(i).getCard();
+            for(int i = 0; i < hand.size(); i++){
+                CardInput tempHandCard = hand.get(i).getCard();
+                if(hand.get(i) instanceof Environment) {
                     ObjectNode cardNode = outputArray.addObject();
                     cardNode.put("mana", tempHandCard.getMana());
-                    if (!(hand.get(i) instanceof Environment)) {
-                        cardNode.put("attackDamage", tempHandCard.getAttackDamage());
-                        cardNode.put("health", tempHandCard.getHealth());
-                    }
                     cardNode.put("description", tempHandCard.getDescription());
                     ArrayNode colorsArray = cardNode.putArray("colors");
                     for (int j = 0; j < tempHandCard.getColors().size(); j++) {
@@ -375,6 +376,47 @@ public class Gameplay {
                     cardNode.put("name", tempHandCard.getName());
                 }
             }
+        }
+        if(actionsInput.getCommand().equals("getCardAtPosition")){
+            int x = actionsInput.getX();
+            int y = actionsInput.getY();
+            if(y + 1 > table.getVectorRows()[x].size()){
+                return;
+            }
+            ObjectNode newNode = output_data.addObject();
+            newNode.put("command", actionsInput.getCommand());
+            newNode.put("x", x);
+            newNode.put("y", y);
+            ObjectNode cardNode = newNode.putObject("output");
+            CardInput tempCard = table.getVectorRows()[x].get(y).getCard();
+            cardNode.put("mana", tempCard.getMana());
+            cardNode.put("attackDamage", tempCard.getAttackDamage());
+            cardNode.put("health", tempCard.getHealth());
+            cardNode.put("description", tempCard.getDescription());
+            ArrayNode colorsArray = cardNode.putArray("colors");
+            for(int k = 0; k < tempCard.getColors().size(); k++) {
+                colorsArray.add(tempCard.getColors().get(k));
+            }
+            cardNode.put("name", tempCard.getName());
+        }
+        if(actionsInput.getCommand().equals("useEnvironmentCard")){
+            int handIndex = actionsInput.getHandIdx();
+            int affectedRow = actionsInput.getAffectedRow();
+            int whichPlayer = playerTurn;
+            int error_no = table.useEnvironmentCard(handIndex, affectedRow, whichPlayer);
+            System.out.println(error_no);
+        }
+    }
+
+    private void deleteDeadCards(){
+        for(int i = 0; i <4; i++){
+            ArrayList<Minion> to_delete = new ArrayList<>();
+            for(int j = 0; j<table.getVectorRows()[i].size(); j++){
+                if(table.getVectorRows()[i].get(j).getHealth() <= 0){
+                    to_delete.add(table.getVectorRows()[i].get(j));
+                }
+            }
+            table.getVectorRows()[i].removeAll(to_delete);
         }
     }
 

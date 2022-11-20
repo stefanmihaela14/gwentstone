@@ -7,6 +7,11 @@ public class Hero extends MyCard{
         super(card);
     }
 
+    @Override
+    public boolean isEnvironmentCard() {
+        return false;
+    }
+
     private int health = 30;
 
 
