@@ -6,9 +6,19 @@ public class Minion extends MyCard{
 
     protected int health = 0;
 
+    protected int damage = 0;
+
     public Minion(CardInput card) {
         super(card);
         this.health = card.getHealth();
+        this.damage = card.getAttackDamage();
+    }
+
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
+    public int getDamage() {
+        return damage;
     }
 
     public void setHealth(int health) {
