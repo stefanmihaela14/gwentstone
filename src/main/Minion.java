@@ -14,6 +14,10 @@ public class Minion extends MyCard{
         this.damage = card.getAttackDamage();
     }
 
+    public int useAbility(Minion attackedCard, int attacked_x){
+        return 0;
+    }
+
     public void setDamage(int damage) {
         this.damage = damage;
     }
@@ -37,6 +41,17 @@ public class Minion extends MyCard{
     protected int attacked_once_this_round = 0; // after it attacks becomes 1
     public void MinionRules(){
 
+    }
+
+
+    protected int hasUsedSpecialAbility = 0;
+
+    public int getHasUsedSpecialAbility() {
+        return hasUsedSpecialAbility;
+    }
+
+    public void setHasUsedSpecialAbility(int hasUsedSpecialAbility) {
+        this.hasUsedSpecialAbility = hasUsedSpecialAbility;
     }
 
 

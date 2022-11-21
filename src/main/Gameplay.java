@@ -59,6 +59,10 @@ public class Gameplay {
         this.number_of_games =number_of_games;
     }
 
+    public int getPlayerTurn(){
+        return playerTurn;
+    }
+
     public int getPlayer1_deck_index() {
         return player1_deck_index;
     }
@@ -123,12 +127,15 @@ public class Gameplay {
 
     private int handIndex;
 
+    private int gameEnded = 0;
+
     public void gameRules(Input input_data, ArrayNode output_data) {
         this.input_data = input_data;
         this.output_data = output_data;
 
         number_of_games = input_data.getGames().size();
         for(int i = 0; i < number_of_games; i++) {
+            gameEnded = 0;
             twoTurnsDone = 0;
             round_no = 0;
             player1 = new Player();
@@ -189,8 +196,16 @@ public class Gameplay {
 
                 handIndex = input_data.getGames().get(i).getActions().get(j).getHandIdx();
 
-                doActions(input_data.getGames().get(i).getActions().get(j));
-
+                boolean debuggingCommand = false;
+                String[] debuggingCommands = {"getPlayerDeck","getPlayerHero","getPlayerTurn",
+                        "getCardsInHand","getPlayerMana","getCardsOnTable",
+                        "getEnvironmentCardsInHand","getCardAtPosition","getFrozenCardsOnTable",
+                        "getTotalGamesPlayed","getPlayerOneWins","getPlayerTwoWins"};
+                String command = input_data.getGames().get(i).getActions().get(j).getCommand();
+                debuggingCommand = Arrays.stream(debuggingCommands).toList().contains(command);
+                if(!(gameEnded == 1 && !debuggingCommand)){
+                    doActions(input_data.getGames().get(i).getActions().get(j));
+                }
                 //verify if any card after each action has health <= 0 and delete it
                 deleteDeadCards();
             }
@@ -492,9 +507,86 @@ public class Gameplay {
             }
         }
         if(actionsInput.getCommand().equals("cardUsesAbility")) {
-            
-        }
+            int xAttacker = actionsInput.getCardAttacker().getX();
+            int yAttacker = actionsInput.getCardAttacker().getY();
+            int xAttacked = actionsInput.getCardAttacked().getX();
+            int yAttacked = actionsInput.getCardAttacked().getY();
 
+            if(yAttacker + 1 > table.getVectorRows()[xAttacker].size()){
+                return;
+            }
+            if(yAttacked + 1 > table.getVectorRows()[xAttacked].size()){
+                return;
+            }
+            Minion attackerCard = table.getVectorRows()[xAttacker].get(yAttacker);
+            Minion attackedCard = table.getVectorRows()[xAttacked].get(yAttacked);
+
+            int errorMsg = attackerCard.useAbility(attackedCard, xAttacked);
+            if(errorMsg != 0){
+                ObjectNode newNode = output_data.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                ObjectNode attackerNode = newNode.putObject("cardAttacker");
+                attackerNode.put("x", actionsInput.getCardAttacker().getX());
+                attackerNode.put("y", actionsInput.getCardAttacker().getY());
+                ObjectNode attackedNode = newNode.putObject("cardAttacked");
+                attackedNode.put("x", actionsInput.getCardAttacked().getX());
+                attackedNode.put("y", actionsInput.getCardAttacked().getY());
+                String errorStr = null;
+                if(errorMsg == 1) {
+                    errorStr = "Attacker card is frozen.";
+                }
+                if(errorMsg == 2) {
+                    errorStr = "Attacker card has already attacked this turn.";
+                }
+                if(errorMsg == 3) {
+                    errorStr = "Attacked card does not belong to the current player.";
+                }
+                if(errorMsg == 4) {
+                    errorStr = "Attacked card does not belong to the enemy.";
+                }
+                if(errorMsg == 5) {
+                    errorStr = "Attacked card is not of type 'Tank'.";
+                }
+                newNode.put("error", errorStr);
+            }
+        }
+        if (actionsInput.getCommand().equals("useAttackHero")) {
+
+            int xAttacker = actionsInput.getCardAttacker().getX();
+            int yAttacker = actionsInput.getCardAttacker().getY();
+
+            Minion attackerCard = table.getVectorRows()[xAttacker].get(yAttacker);
+
+            int errorMsg = useHeroAttack(attackerCard);
+            if(errorMsg == 1 || errorMsg ==2 || errorMsg == 3){
+                ObjectNode newNode = output_data.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                ObjectNode attackerNode = newNode.putObject("cardAttacker");
+                attackerNode.put("x", actionsInput.getCardAttacker().getX());
+                attackerNode.put("y", actionsInput.getCardAttacker().getY());
+                String errorStr = null;
+                if(errorMsg == 1) {
+                    errorStr = "Attacker card is frozen.";
+                }
+                if(errorMsg == 2) {
+                    errorStr = "Attacker card has already attacked this turn.";
+                }
+                if(errorMsg == 3) {
+                    errorStr = "Attacked card is not of type 'Tank'.";
+                }
+                newNode.put("error", errorStr);
+            }
+            if(errorMsg == 4 || errorMsg == 5){
+                gameEnded = 1;
+                ObjectNode newNode = output_data.addObject();
+                if(errorMsg == 4) {
+                    newNode.put("gameEnded", "Player one killed the enemy hero.");
+                }
+                if(errorMsg == 5){
+                    newNode.put("gameEnded", "Player two killed the enemy hero.");
+                }
+            }
+        }
     }
 
     // some auxiliary functions
@@ -533,7 +625,7 @@ public class Gameplay {
         int enemyPlayerFirstRow = 4 - (2 * enemyPlayer);
 
         int tankCardExists = 0;
-        for(int i = enemyPlayerFirstRow; i < enemyPlayerFirstRow + 1; i++) {
+        for(int i = enemyPlayerFirstRow; i <= enemyPlayerFirstRow + 1; i++) {
             for(int j = 0; j < table.getVectorRows()[i].size(); j++) {
                 CardInput tempCard = table.getVectorRows()[i].get(j).getCard();
                 if(tempCard.getName().equals("Goliath") || tempCard.getName().equals("Warden")) {
@@ -548,11 +640,62 @@ public class Gameplay {
             return 3; // error : Attacked card is not of type 'Tank'.
         } else {
             int remainingHealth = attackedCard.getHealth() - minionAttacks.getDamage();
-            //System.out.println("viata ramasa este = " + remainingHealth);
             attackedCard.setHealth(remainingHealth);
             minionAttacks.setAttacked_once_this_round(1);
         }
 
+        return 0;
+    }
+
+    private int useHeroAttack(Minion attackerCard) {
+        if(attackerCard.getIs_frozen() == 1){
+            return 1; // error : Attacker card is frozen.
+        }
+        if (attackerCard.getAttacked_once_this_round() == 1) {
+            return  2; // error : Attacker card has already attacked this turn.
+        }
+
+        int whichPlayer = playerTurn;
+
+        Hero currentHero;
+        if(playerTurn == 1){
+            currentHero = table.getHero_2();
+        } else {
+            currentHero = table.getHero_1();
+        }
+
+
+        int enemyPlayer = 3 - whichPlayer;
+        int enemyPlayerFirstRow = 4 - (2 * enemyPlayer);
+        int tankCardExists = 0;
+
+
+        for (int i = enemyPlayerFirstRow; i <= enemyPlayerFirstRow + 1; i++) {
+            for (int j = 0; j < table.getVectorRows()[i].size(); j++) {
+                CardInput tempCard = table.getVectorRows()[i].get(j).getCard();
+                if (tempCard.getName().equals("Goliath") || tempCard.getName().equals("Warden")) {
+                    tankCardExists = 1;
+                }
+            }
+        }
+
+        CardInput tempInput = attackerCard.getCard();
+        if(!(tempInput.getName().equals("Goliath") || tempInput.getName().equals("Warden"))
+                && tankCardExists == 1) {
+            return 3; // error : Attacked card is not of type 'Tank'.
+        } else {
+            int currentHeroLife = currentHero.getHealth() - attackerCard.getDamage();
+            currentHero.setHealth(currentHeroLife);
+        }
+        attackerCard.setAttacked_once_this_round(1);
+
+        if(currentHero.getHealth() <= 0){
+            if(playerTurn == 1){
+                return 4; // Player one killed the enemy hero.
+            } else {
+                return 5; // Player two killed the enemy hero.
+            }
+        }
         return 0;
     }
 
@@ -585,4 +728,5 @@ public class Gameplay {
     public void setInput_data(Input input_data) {
         this.input_data = input_data;
     }
+
 }
