@@ -14,6 +14,10 @@ public class Player {
         this.mana -= mana;
     }
 
+    public void incrementGamesWon(){
+        gamesWon = gamesWon + 1;
+    }
+
 //    getters and setters
     public int getMana() {
         return mana;

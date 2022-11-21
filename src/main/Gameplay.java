@@ -12,8 +12,8 @@ import java.util.Collections;
 import java.util.Random;
 
 public class Gameplay {
-    private Player player1;
-    private Player player2;
+    private Player player1 = new Player();
+    private Player player2 = new Player();
     private Input input_data;
     private ArrayNode output_data;
 
@@ -129,6 +129,8 @@ public class Gameplay {
 
     private int gameEnded = 0;
 
+    private int gamesPlayed = 0;
+
     public void gameRules(Input input_data, ArrayNode output_data) {
         this.input_data = input_data;
         this.output_data = output_data;
@@ -138,8 +140,13 @@ public class Gameplay {
             gameEnded = 0;
             twoTurnsDone = 0;
             round_no = 0;
-            player1 = new Player();
-            player2 = new Player();
+            player1.setMana(1);
+            player2.setMana(1);
+            if(i == 0){
+                player1.setGamesWon(0);
+                player2.setGamesWon(0);
+                gamesPlayed = 0;
+            }
 
             player1_deck_index = input_data.getGames().get(i).getStartGame().getPlayerOneDeckIdx();
             player2_deck_index = input_data.getGames().get(i).getStartGame().getPlayerTwoDeckIdx();
@@ -175,7 +182,6 @@ public class Gameplay {
             for(int j = 0; j < input_data.getGames().get(i).getActions().size(); j++) {
                 // mana logic
                 if(twoTurnsDone == 2) {
-                    //System.out.println("End of round.");
                     round_no++;
                     twoTurnsDone = 0;
                     int valueToIncreaseMana = round_no + 1;
@@ -186,12 +192,10 @@ public class Gameplay {
                     int player2_mana = player2.getMana();
 
                     player1.setMana(player1_mana + valueToIncreaseMana);
-//                    System.out.println(player1_mana);
                     player2.setMana(player2_mana + valueToIncreaseMana);
 
                     table.putCardInHand(1);
                     table.putCardInHand(2);
-
                 }
 
                 handIndex = input_data.getGames().get(i).getActions().get(j).getHandIdx();
@@ -581,21 +585,90 @@ public class Gameplay {
                 ObjectNode newNode = output_data.addObject();
                 if(errorMsg == 4) {
                     newNode.put("gameEnded", "Player one killed the enemy hero.");
+                    player1.incrementGamesWon();
+                    gamesPlayed = gamesPlayed + 1;
                 }
                 if(errorMsg == 5){
                     newNode.put("gameEnded", "Player two killed the enemy hero.");
+                    player2.incrementGamesWon();
+                    gamesPlayed = gamesPlayed + 1;
                 }
             }
+        }
+        if(actionsInput.getCommand().equals("useHeroAbility")){
+            int attackedRow = actionsInput.getAffectedRow();
+
+            Hero currentHero = null;
+            Player currentPlayer = null;
+            if(playerTurn == 1){
+                currentHero = table.getHero_1();
+                currentPlayer = player1;
+            } else {
+                currentHero = table.getHero_2();
+                currentPlayer = player2;
+            }
+            int errorMsg = currentHero.heroAbility(attackedRow, currentPlayer);
+            if(errorMsg != 0){
+                ObjectNode newNode = output_data.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("affectedRow", actionsInput.getAffectedRow());
+                String errString = null;
+                if(errorMsg == 1) {
+                    errString = "Not enough mana to use hero's ability.";
+                }
+                if(errorMsg == 2) {
+                    errString = "Hero has already attacked this turn.";
+                }
+                if(errorMsg == 3) {
+                    errString = "Selected row does not belong to the enemy.";
+                }
+                if(errorMsg == 4) {
+                    errString = "Selected row does not belong to the current player.";
+                }
+                newNode.put("error", errString);
+            }
+        }
+        if(actionsInput.getCommand().equals("getPlayerOneWins")){
+            int whichPlayer = 1;
+            int gamesWon = getPlayerWins(whichPlayer);
+            ObjectNode newNode = output_data.addObject();
+            newNode.put("command", actionsInput.getCommand());
+            newNode.put("output", gamesWon);
+        }
+        if(actionsInput.getCommand().equals("getPlayerTwoWins")){
+            int whichPlayer = 2;
+            int gamesWon = getPlayerWins(whichPlayer);
+            ObjectNode newNode = output_data.addObject();
+            newNode.put("command", actionsInput.getCommand());
+            newNode.put("output", gamesWon);
+        }
+        if(actionsInput.getCommand().equals("getTotalGamesPlayed")){
+            ObjectNode newNode = output_data.addObject();
+            newNode.put("command", actionsInput.getCommand());
+            newNode.put("output", gamesPlayed);
         }
     }
 
     // some auxiliary functions
+    private int getPlayerWins(int whichPLayer){
+        Player player = null;
+        if(whichPLayer == 1){
+            player = player1;
+        } else {
+            player = player2;
+        }
+        int gamesWon = player.getGamesWon();
+        return gamesWon;
+    }
+
     private void resetWhoAttacked(){
         for(int i = 0; i<4; i++){
             for(Minion minion: table.getVectorRows()[i]){
                 minion.setAttacked_once_this_round(0);
             }
         }
+        table.getHero_1().setAttacked_once_this_round(0);
+        table.getHero_2().setAttacked_once_this_round(0);
     }
 
     private int useAttack(Minion minionAttacks, Minion attackedCard, int xAttacked){
@@ -713,7 +786,7 @@ public class Gameplay {
 
     private void unfrozeCards(int playerTurn) {
         int playerFirstRow = 4 - (2 * playerTurn);
-        for(int i = playerFirstRow; i < playerFirstRow + 1; i++) {
+        for(int i = playerFirstRow; i <= playerFirstRow + 1; i++) {
             for(int j = 0; j<table.getVectorRows()[i].size(); j++) {
                 if(table.getVectorRows()[i].get(j).getIs_frozen() == 1) {
                     table.getVectorRows()[i].get(j).setIs_frozen(0);
