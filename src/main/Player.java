@@ -1,44 +1,65 @@
 package main;
 
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Player {
-    public Player(){
+    public Player() {
 
     }
-    private int mana = 1;
 
-    private int gamesPlayed = 0;
+    private int mana = 1;
 
     private int gamesWon = 0;
 
-    public void depleteMana(int mana){
-        this.mana -= mana;
+    /**
+     *
+     * @param Mana
+     */
+    public void deleteMana(int Mana) {
+        mana -= Mana;
     }
 
-    public void incrementGamesWon(){
+    /**
+     *
+     */
+    public void incrementGamesWon() {
         gamesWon = gamesWon + 1;
     }
 
 //    getters and setters
+
+    /**
+     *
+     * @return
+     */
     public int getMana() {
         return mana;
     }
 
+    /**
+     *
+     * @param mana
+     */
     public void setMana(int mana) {
         this.mana = mana;
     }
 
-    public int getGamesPlayed() {
-        return gamesPlayed;
-    }
-
-    public void setGamesPlayed(int gamesPlayed) {
-        this.gamesPlayed = gamesPlayed;
-    }
-
+    /**
+     *
+     * @return
+     */
     public int getGamesWon() {
         return gamesWon;
     }
 
+    /**
+     *
+     * @param gamesWon
+     */
     public void setGamesWon(int gamesWon) {
         this.gamesWon = gamesWon;
     }

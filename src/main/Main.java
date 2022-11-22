@@ -69,8 +69,6 @@ public final class Main {
 
         ArrayNode output = objectMapper.createArrayNode();
 
-        //TODO add here the entry point to your implementation
-
 //        System.out.println(inputData.getPlayerOneDecks().getNrCardsInDeck());
         Gameplay.getInstance().gameRules(inputData, output);
 
