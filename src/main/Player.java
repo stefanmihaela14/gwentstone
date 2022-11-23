@@ -16,15 +16,14 @@ public class Player {
     private int gamesWon = 0;
 
     /**
-     *
-     * @param Mana
+     * @param Mana the amount of mana to be decreased
      */
-    public void deleteMana(int Mana) {
+    public void deleteMana(final int Mana) {
         mana -= Mana;
     }
 
     /**
-     *
+     * increase the number of games won by one every time is called
      */
     public void incrementGamesWon() {
         gamesWon = gamesWon + 1;
@@ -33,34 +32,30 @@ public class Player {
 //    getters and setters
 
     /**
-     *
-     * @return
+     * @return tha current player's mana
      */
     public int getMana() {
         return mana;
     }
 
     /**
-     *
-     * @param mana
+     * @param mana change the player's current mana to a new value
      */
-    public void setMana(int mana) {
+    public void setMana(final int mana) {
         this.mana = mana;
     }
 
     /**
-     *
-     * @return
+     * @return the player's number of won games
      */
     public int getGamesWon() {
         return gamesWon;
     }
 
     /**
-     *
-     * @param gamesWon
+     * @param gamesWon change the player's current number of games won to a new value
      */
-    public void setGamesWon(int gamesWon) {
+    public void setGamesWon(final int gamesWon) {
         this.gamesWon = gamesWon;
     }
 }

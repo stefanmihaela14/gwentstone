@@ -69,7 +69,6 @@ public final class Main {
 
         ArrayNode output = objectMapper.createArrayNode();
 
-//        System.out.println(inputData.getPlayerOneDecks().getNrCardsInDeck());
         Gameplay.getInstance().gameRules(inputData, output);
 
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();

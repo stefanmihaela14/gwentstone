@@ -25,22 +25,6 @@ public class Table {
 
     private ArrayList<MyCard> myDeckPlayer2 = new ArrayList<>();
 
-    /**
-     *
-     * @return
-     */
-    public ArrayList<MyCard> getMyDeckPlayer1() {
-        return myDeckPlayer1;
-    }
-
-    /**
-     *
-     * @param myDeck
-     */
-    public void setMyDeckPlayer1(final ArrayList<MyCard> myDeck) {
-        this.myDeckPlayer1 = myDeck;
-    }
-
     private Hero hero1;
 
     private Hero hero2;
@@ -51,7 +35,11 @@ public class Table {
 
     private ArrayList<Minion>[] vectorRows = new ArrayList[NO_4];
 
-
+    /**
+     * The table consists of an array of ArrayLists where the cards will be put.
+     * Verify each card's type and place it in the player's deck, not to
+     * modify the input deck.
+     */
     public Table() {
         for (int i = 0; i < Gameplay.getInstance().getplayer1NoCardsInDeck(); i++) {
             CardInput newCardInfo = Gameplay.getInstance().getplayer1CurrentDeck().get(i);
@@ -104,8 +92,8 @@ public class Table {
     }
 
     /**
-     *
-     * @param whichPlayer
+     * Take a card from the deck and put it in an array - the player's hand -
+     * @param whichPlayer the player whose turn it is
      */
     public void putCardInHand(final int whichPlayer) {
         if (whichPlayer == 1 && myDeckPlayer1.size() != 0) {
@@ -118,10 +106,8 @@ public class Table {
     }
 
     /**
-     *
-     * @param indexCard
-     * @param whichPlayer
-     * @return
+     * Verify each card's type and place it accordingly on the table
+     * @return the number which corresponds to the output error
      */
     public int putCardOnTable(final int indexCard, final int whichPlayer) {
         if (whichPlayer == 1) {
@@ -221,11 +207,11 @@ public class Table {
     }
 
     /**
-     *
-     * @param handIndex
-     * @param affectedRow
-     * @param whichPlayer
-     * @return
+     * Verify the possible errors
+     * @param handIndex the index of the card from the player's hand
+     * @param affectedRow the row whose cards will be damaged
+     * @param whichPlayer current player's turn
+     * @return the number which corresponds to the output error
      */
     public int useEnvironmentCard(final int handIndex, final int affectedRow,
                                   final int whichPlayer) {
@@ -283,64 +269,63 @@ public class Table {
 //    Getters and Setters:
 
     /**
-     *
-     * @return
+     * @return player one's hero
      */
     public Hero getHero1() {
         return hero1;
     }
 
     /**
-     *
-     * @param hero1
+     * @param hero1 set the hero of player one
      */
-    public void setHero1(Hero hero1) {
+    public void setHero1(final Hero hero1) {
         this.hero1 = hero1;
     }
 
     /**
-     *
-     * @return
+     * @return player two's hero
      */
     public Hero getHero2() {
         return hero2;
     }
 
     /**
-     *
-     * @param hero2
+     * @param hero2 set the hero of player two
      */
-    public void setHero2(Hero hero2) {
+    public void setHero2(final Hero hero2) {
         this.hero2 = hero2;
     }
 
     /**
-     *
-     * @return
+     * @return the player's deck of cards as an arrayList with elements of type MyCard
+     */
+    public ArrayList<MyCard> getMyDeckPlayer1() {
+        return myDeckPlayer1;
+    }
+
+    /**
+     * @return the player's deck of cards as an arrayList with elements of type MyCard
      */
     public ArrayList<MyCard> getMyDeckPlayer2() {
         return myDeckPlayer2;
     }
 
     /**
-     *
-     * @return
+     * @return the player's cards in hand as an ArrayList with elements of type MyCard
      */
     public ArrayList<MyCard> getHandPlayer1() {
         return handPlayer1;
     }
 
     /**
-     *
-     * @return
+     * @return the player's cards in hand as an ArrayList with elements of type MyCard
      */
     public ArrayList<MyCard> getHandPlayer2() {
         return handPlayer2;
     }
 
     /**
-     *
-     * @return
+     * @return the arrayList with the table and the cards on it
      */
     public ArrayList<Minion>[] getVectorRows() {
         return vectorRows;

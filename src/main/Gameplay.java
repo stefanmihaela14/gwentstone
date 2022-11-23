@@ -19,11 +19,11 @@ import java.util.Random;
 
 @Getter
 @Setter
-public class Gameplay {
+public final class Gameplay {
     private static Gameplay instance;
 
     /**
-     * @return ??
+     * @return Get Singleton instance.
      */
     public static Gameplay getInstance() {
         if (instance == null) {
@@ -124,13 +124,12 @@ public class Gameplay {
     private int gamesPlayed = 0;
 
     /**
-     *
-     * @param InputData ??
-     * @param OutputData ??
+     * @param inputDataNew Data about all the games that are to be played.
+     * @param outputDataNew ArrayNode in which the output is built.
      */
-    public void gameRules(Input InputData, ArrayNode OutputData) {
-        inputData = InputData;
-        outputData = OutputData;
+    public void gameRules(final Input inputDataNew, final ArrayNode outputDataNew) {
+        inputData = inputDataNew;
+        outputData = outputDataNew;
 
         numberOfGames = inputData.getGames().size();
         for (int i = 0; i < numberOfGames; i++) {
@@ -214,179 +213,103 @@ public class Gameplay {
     }
 
     /**
-     *
-     * @param actionsInput ??
+     * @param actionsInput the actions given in ActionInput
      */
-    public void doActions(ActionsInput actionsInput) {
-        if (actionsInput.getCommand().equals("getPlayerDeck")) {
-            ObjectNode newNode = outputData.addObject();
-            int whichPlayer = actionsInput.getPlayerIdx();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("playerIdx", actionsInput.getPlayerIdx());
-            ArrayNode outputArray = newNode.putArray("output");
-            ArrayList<MyCard> deck;
-            if (whichPlayer == 1) {
-                deck = table.getMyDeckPlayer1();
-            } else {
-                deck = table.getMyDeckPlayer2();
-            }
-            for (int i = 0; i < deck.size(); i++) {
-                CardInput tempCard = deck.get(i).getCard();
-                ObjectNode cardNode = outputArray.addObject();
-                cardNode.put("mana", tempCard.getMana());
-                if (!(deck.get(i) instanceof Environment)) {
-                    cardNode.put("attackDamage", tempCard.getAttackDamage());
-                    cardNode.put("health", tempCard.getHealth());
-                }
-                cardNode.put("description", tempCard.getDescription());
-                ArrayNode colorsArray = cardNode.putArray("colors");
-                for (int j = 0; j < tempCard.getColors().size(); j++) {
-                    colorsArray.add(tempCard.getColors().get(j));
-                }
-                cardNode.put("name", tempCard.getName());
-            }
-        }
-        if (actionsInput.getCommand().equals("getPlayerHero")) {
-            ObjectNode newNode = outputData.addObject();
-            int whichPlayer = actionsInput.getPlayerIdx();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("playerIdx", actionsInput.getPlayerIdx());
-            ObjectNode heroNode = newNode.putObject("output");
-            CardInput hero;
-            if (whichPlayer == 1) {
-                hero = table.getHero1().getCard();
-            } else {
-                hero = table.getHero2().getCard();
-            }
-            heroNode.put("mana", hero.getMana());
-            heroNode.put("description", hero.getDescription());
-            ArrayNode colorsArray = heroNode.putArray("colors");
-            for (int j = 0; j < hero.getColors().size(); j++) {
-                colorsArray.add(hero.getColors().get(j));
-            }
-            heroNode.put("name", hero.getName());
-            Hero tempHero;
-            if (whichPlayer == 1) {
-                tempHero = table.getHero1();
-            } else {
-                tempHero = table.getHero2();
-            }
-            heroNode.put("health", tempHero.getHealth());
-        }
-        if (actionsInput.getCommand().equals("endPlayerTurn")) {
-            unfrozeCards(playerTurn);
-            if (playerTurn == 1) {
-                playerTurn = 2;
-            } else {
-                playerTurn = 1;
-            }
-            twoTurnsDone++;
-            resetWhoAttacked();
-        }
-        if (actionsInput.getCommand().equals("getPlayerTurn")) {
-            ObjectNode newNode = outputData.addObject();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("output", playerTurn);
-        }
-        if (actionsInput.getCommand().equals("getCardsInHand")) {
-            ObjectNode newNode = outputData.addObject();
-            int whichPlayer = actionsInput.getPlayerIdx();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("playerIdx", actionsInput.getPlayerIdx());
-            ArrayNode outputArray = newNode.putArray("output");
-            ArrayList<MyCard> hand;
-            if (whichPlayer == 1) {
-                hand = table.getHandPlayer1();
-            } else {
-                hand = table.getHandPlayer2();
-            }
-            for (int i = 0; i < hand.size(); i++) {
-                CardInput tempHandCard = hand.get(i).getCard();
-                ObjectNode cardNode = outputArray.addObject();
-                cardNode.put("mana", tempHandCard.getMana());
-                if (!(hand.get(i) instanceof Environment)) {
-                    cardNode.put("attackDamage", tempHandCard.getAttackDamage());
-                    cardNode.put("health", tempHandCard.getHealth());
-                }
-                cardNode.put("description", tempHandCard.getDescription());
-                ArrayNode colorsArray = cardNode.putArray("colors");
-                for (int j = 0; j < tempHandCard.getColors().size(); j++) {
-                    colorsArray.add(tempHandCard.getColors().get(j));
-                }
-                cardNode.put("name", tempHandCard.getName());
-            }
-        }
-        if (actionsInput.getCommand().equals("getPlayerMana")) {
-            ObjectNode newNode = outputData.addObject();
-            int whichPlayer = actionsInput.getPlayerIdx();
-            Player player = null;
-            if (whichPlayer == 1) {
-                player = player1;
-            } else {
-                player = player2;
-            }
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("playerIdx", actionsInput.getPlayerIdx());
-            newNode.put("output", player.getMana());
-        }
-        if (actionsInput.getCommand().equals("placeCard")) {
-            int output = table.putCardOnTable(handIndex, playerTurn);
-            if (output == 1) {
+    public void doActions(final ActionsInput actionsInput) {
+        switch (actionsInput.getCommand()) {
+            case "getPlayerDeck" -> {
                 ObjectNode newNode = outputData.addObject();
+                int whichPlayer = actionsInput.getPlayerIdx();
                 newNode.put("command", actionsInput.getCommand());
-                newNode.put("handIdx", actionsInput.getHandIdx());
-                newNode.put("error", "Cannot place environment card on table.");
-            } else if (output == 2) {
-                ObjectNode newNode = outputData.addObject();
-                newNode.put("command", actionsInput.getCommand());
-                newNode.put("handIdx", actionsInput.getHandIdx());
-                newNode.put("error", "Not enough mana to place card on table.");
-            } else if (output == NO_3) {
-                ObjectNode newNode = outputData.addObject();
-                newNode.put("command", actionsInput.getCommand());
-                newNode.put("handIdx", actionsInput.getHandIdx());
-                newNode.put("error", "Cannot place card on table since row is full.");
-            }
-        }
-        if (actionsInput.getCommand().equals("getCardsOnTable")) {
-            ObjectNode newNode = outputData.addObject();
-            newNode.put("command", actionsInput.getCommand());
-            ArrayNode outputArray = newNode.putArray("output");
-            for (int i = 0; i < table.getVectorRows().length; i++) {
-                ArrayNode lineArray = outputArray.addArray();
-                for (int j = 0; j < table.getVectorRows()[i].size(); j++) {
-                    CardInput tempCard = table.getVectorRows()[i].get(j).getCard();
-                    ObjectNode cardNode = lineArray.addObject();
+                newNode.put("playerIdx", actionsInput.getPlayerIdx());
+                ArrayNode outputArray = newNode.putArray("output");
+                ArrayList<MyCard> deck;
+                if (whichPlayer == 1) {
+                    deck = table.getMyDeckPlayer1();
+                } else {
+                    deck = table.getMyDeckPlayer2();
+                }
+                for (int i = 0; i < deck.size(); i++) {
+                    CardInput tempCard = deck.get(i).getCard();
+                    ObjectNode cardNode = outputArray.addObject();
                     cardNode.put("mana", tempCard.getMana());
-                    cardNode.put("attackDamage", table.getVectorRows()[i].get(j).getDamage());
-                    cardNode.put("health", table.getVectorRows()[i].get(j).getHealth());
-
+                    if (!(deck.get(i).isEnvironmentCard())) {
+                        cardNode.put("attackDamage", tempCard.getAttackDamage());
+                        cardNode.put("health", tempCard.getHealth());
+                    }
                     cardNode.put("description", tempCard.getDescription());
                     ArrayNode colorsArray = cardNode.putArray("colors");
-                    for (int k = 0; k < tempCard.getColors().size(); k++) {
-                        colorsArray.add(tempCard.getColors().get(k));
+                    for (int j = 0; j < tempCard.getColors().size(); j++) {
+                        colorsArray.add(tempCard.getColors().get(j));
                     }
                     cardNode.put("name", tempCard.getName());
                 }
+                break;
             }
-        }
-        if (actionsInput.getCommand().equals("getEnvironmentCardsInHand")) { //this should work
-            ObjectNode newNode = outputData.addObject();
-            int whichPlayer = actionsInput.getPlayerIdx();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("playerIdx", actionsInput.getPlayerIdx());
-            ArrayNode outputArray = newNode.putArray("output");
-            ArrayList<MyCard> hand;
-            if (whichPlayer == 1) {
-                hand = table.getHandPlayer1();
-            } else {
-                hand = table.getHandPlayer2();
+            case "getPlayerHero" -> {
+                ObjectNode newNode = outputData.addObject();
+                int whichPlayer = actionsInput.getPlayerIdx();
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("playerIdx", actionsInput.getPlayerIdx());
+                ObjectNode heroNode = newNode.putObject("output");
+                CardInput hero;
+                if (whichPlayer == 1) {
+                    hero = table.getHero1().getCard();
+                } else {
+                    hero = table.getHero2().getCard();
+                }
+                heroNode.put("mana", hero.getMana());
+                heroNode.put("description", hero.getDescription());
+                ArrayNode colorsArray = heroNode.putArray("colors");
+                for (int j = 0; j < hero.getColors().size(); j++) {
+                    colorsArray.add(hero.getColors().get(j));
+                }
+                heroNode.put("name", hero.getName());
+                Hero tempHero;
+                if (whichPlayer == 1) {
+                    tempHero = table.getHero1();
+                } else {
+                    tempHero = table.getHero2();
+                }
+                heroNode.put("health", tempHero.getHealth());
+                break;
             }
-            for (int i = 0; i < hand.size(); i++) {
-                CardInput tempHandCard = hand.get(i).getCard();
-                if (hand.get(i) instanceof Environment) {
+            case "endPlayerTurn" -> {
+                unfrozeCards(playerTurn);
+                if (playerTurn == 1) {
+                    playerTurn = 2;
+                } else {
+                    playerTurn = 1;
+                }
+                twoTurnsDone++;
+                resetWhoAttacked();
+            }
+            case "getPlayerTurn" -> {
+                ObjectNode newNode = outputData.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("output", playerTurn);
+                break;
+            }
+            case "getCardsInHand" -> {
+                ObjectNode newNode = outputData.addObject();
+                int whichPlayer = actionsInput.getPlayerIdx();
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("playerIdx", actionsInput.getPlayerIdx());
+                ArrayNode outputArray = newNode.putArray("output");
+                ArrayList<MyCard> hand;
+                if (whichPlayer == 1) {
+                    hand = table.getHandPlayer1();
+                } else {
+                    hand = table.getHandPlayer2();
+                }
+                for (int i = 0; i < hand.size(); i++) {
+                    CardInput tempHandCard = hand.get(i).getCard();
                     ObjectNode cardNode = outputArray.addObject();
                     cardNode.put("mana", tempHandCard.getMana());
+                    if (!(hand.get(i).isEnvironmentCard())) {
+                        cardNode.put("attackDamage", tempHandCard.getAttackDamage());
+                        cardNode.put("health", tempHandCard.getHealth());
+                    }
                     cardNode.put("description", tempHandCard.getDescription());
                     ArrayNode colorsArray = cardNode.putArray("colors");
                     for (int j = 0; j < tempHandCard.getColors().size(); j++) {
@@ -394,67 +317,50 @@ public class Gameplay {
                     }
                     cardNode.put("name", tempHandCard.getName());
                 }
+                break;
             }
-        }
-        if (actionsInput.getCommand().equals("getCardAtPosition")) {
-            int x = actionsInput.getX();
-            int y = actionsInput.getY();
-            ObjectNode newNode = outputData.addObject();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("x", x);
-            newNode.put("y", y);
-            if (y + 1 > table.getVectorRows()[x].size()) {
-                newNode.put("output", "No card available at that position.");
-                return;
+            case "getPlayerMana" -> {
+                ObjectNode newNode = outputData.addObject();
+                int whichPlayer = actionsInput.getPlayerIdx();
+                Player player = null;
+                if (whichPlayer == 1) {
+                    player = player1;
+                } else {
+                    player = player2;
+                }
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("playerIdx", actionsInput.getPlayerIdx());
+                newNode.put("output", player.getMana());
+                break;
             }
-            ObjectNode cardNode = newNode.putObject("output");
-            CardInput tempCard = table.getVectorRows()[x].get(y).getCard();
-            cardNode.put("mana", tempCard.getMana());
-            cardNode.put("attackDamage", table.getVectorRows()[x].get(y).getDamage());
-            cardNode.put("health", table.getVectorRows()[x].get(y).getHealth());
-            cardNode.put("description", tempCard.getDescription());
-            ArrayNode colorsArray = cardNode.putArray("colors");
-            for (int k = 0; k < tempCard.getColors().size(); k++) {
-                colorsArray.add(tempCard.getColors().get(k));
+            case "placeCard" -> {
+                int output = table.putCardOnTable(handIndex, playerTurn);
+                if (output == 1) {
+                    ObjectNode newNode = outputData.addObject();
+                    newNode.put("command", actionsInput.getCommand());
+                    newNode.put("handIdx", actionsInput.getHandIdx());
+                    newNode.put("error", "Cannot place environment card on table.");
+                } else if (output == 2) {
+                    ObjectNode newNode = outputData.addObject();
+                    newNode.put("command", actionsInput.getCommand());
+                    newNode.put("handIdx", actionsInput.getHandIdx());
+                    newNode.put("error", "Not enough mana to place card on table.");
+                } else if (output == NO_3) {
+                    ObjectNode newNode = outputData.addObject();
+                    newNode.put("command", actionsInput.getCommand());
+                    newNode.put("handIdx", actionsInput.getHandIdx());
+                    newNode.put("error", "Cannot place card on table since row is full.");
+                }
             }
-            cardNode.put("name", tempCard.getName());
-        }
-        if (actionsInput.getCommand().equals("useEnvironmentCard")) {
-            int handIndex = actionsInput.getHandIdx();
-            int affectedRow = actionsInput.getAffectedRow();
-            int whichPlayer = playerTurn;
-            int errorNo = table.useEnvironmentCard(handIndex, affectedRow, whichPlayer);
-            if (errorNo == 0) {
-                return;
-            }
-            ObjectNode newNode = outputData.addObject();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("handIdx", actionsInput.getHandIdx());
-            newNode.put("affectedRow", actionsInput.getAffectedRow());
-            String errorMsg = null;
-            if (errorNo == 1) {
-                errorMsg = "Chosen card is not of type environment.";
-            }
-            if (errorNo == 2) {
-                errorMsg = "Not enough mana to use environment card.";
-            }
-            if (errorNo == NO_3) {
-                errorMsg = "Chosen row does not belong to the enemy.";
-            }
-            if (errorNo == NO_4) {
-                errorMsg = "Cannot steal enemy card since the player's row is full.";
-            }
-            newNode.put("error", errorMsg);
-        }
-        if (actionsInput.getCommand().equals("getFrozenCardsOnTable")) {
-            ObjectNode newNode = outputData.addObject();
-            newNode.put("command", actionsInput.getCommand());
-            ArrayNode outputArray = newNode.putArray("output");
-            for (int i = 0; i < table.getVectorRows().length; i++) {
-                for (int j = 0; j < table.getVectorRows()[i].size(); j++) {
-                    CardInput tempCard = table.getVectorRows()[i].get(j).getCard();
-                    if (table.getVectorRows()[i].get(j).getIsFrozen() == 1) {
-                        ObjectNode cardNode = outputArray.addObject();
+            case "getCardsOnTable" -> {
+                ObjectNode newNode = outputData.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                ArrayNode outputArray = newNode.putArray("output");
+                for (int i = 0; i < table.getVectorRows().length; i++) {
+                    ArrayNode lineArray = outputArray.addArray();
+                    for (int j = 0; j < table.getVectorRows()[i].size(); j++) {
+                        CardInput tempCard = table.getVectorRows()[i].get(j).getCard();
+                        ObjectNode cardNode = lineArray.addObject();
                         cardNode.put("mana", tempCard.getMana());
                         cardNode.put("attackDamage", table.getVectorRows()[i].get(j).getDamage());
                         cardNode.put("health", table.getVectorRows()[i].get(j).getHealth());
@@ -467,190 +373,300 @@ public class Gameplay {
                         cardNode.put("name", tempCard.getName());
                     }
                 }
+                break;
             }
-        }
-        if (actionsInput.getCommand().equals("cardUsesAttack")) {
-
-            int xAttacker = actionsInput.getCardAttacker().getX();
-            int yAttacker = actionsInput.getCardAttacker().getY();
-            int xAttacked = actionsInput.getCardAttacked().getX();
-            int yAttacked = actionsInput.getCardAttacked().getY();
-
-            Minion attackerMinion = table.getVectorRows()[xAttacker].get(yAttacker);
-            Minion attackedMinion = table.getVectorRows()[xAttacked].get(yAttacked);
-            int errorMsg = useAttack(attackerMinion, attackedMinion, xAttacked);
-
-            if (errorMsg != 0) {
+            case "getEnvironmentCardsInHand" -> {
+                ObjectNode newNode = outputData.addObject();
+                int whichPlayer = actionsInput.getPlayerIdx();
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("playerIdx", actionsInput.getPlayerIdx());
+                ArrayNode outputArray = newNode.putArray("output");
+                ArrayList<MyCard> hand;
+                if (whichPlayer == 1) {
+                    hand = table.getHandPlayer1();
+                } else {
+                    hand = table.getHandPlayer2();
+                }
+                for (int i = 0; i < hand.size(); i++) {
+                    CardInput tempHandCard = hand.get(i).getCard();
+                    if (hand.get(i).isEnvironmentCard()) {
+                        ObjectNode cardNode = outputArray.addObject();
+                        cardNode.put("mana", tempHandCard.getMana());
+                        cardNode.put("description", tempHandCard.getDescription());
+                        ArrayNode colorsArray = cardNode.putArray("colors");
+                        for (int j = 0; j < tempHandCard.getColors().size(); j++) {
+                            colorsArray.add(tempHandCard.getColors().get(j));
+                        }
+                        cardNode.put("name", tempHandCard.getName());
+                    }
+                }
+                break;
+            }
+            case "getCardAtPosition" -> {
+                int x = actionsInput.getX();
+                int y = actionsInput.getY();
                 ObjectNode newNode = outputData.addObject();
                 newNode.put("command", actionsInput.getCommand());
-                ObjectNode attackerNode = newNode.putObject("cardAttacker");
-                attackerNode.put("x", actionsInput.getCardAttacker().getX());
-                attackerNode.put("y", actionsInput.getCardAttacker().getY());
-                ObjectNode attackedNode = newNode.putObject("cardAttacked");
-                attackedNode.put("x", actionsInput.getCardAttacked().getX());
-                attackedNode.put("y", actionsInput.getCardAttacked().getY());
-                String errorStr = null;
-                if (errorMsg == 1) {
-                    errorStr = "Attacked card does not belong to the enemy.";
+                newNode.put("x", x);
+                newNode.put("y", y);
+                if (y + 1 > table.getVectorRows()[x].size()) {
+                    newNode.put("output", "No card available at that position.");
+                    return;
                 }
-                if (errorMsg == 2) {
-                    errorStr = "Attacker card is frozen.";
+                ObjectNode cardNode = newNode.putObject("output");
+                CardInput tempCard = table.getVectorRows()[x].get(y).getCard();
+                cardNode.put("mana", tempCard.getMana());
+                cardNode.put("attackDamage", table.getVectorRows()[x].get(y).getDamage());
+                cardNode.put("health", table.getVectorRows()[x].get(y).getHealth());
+                cardNode.put("description", tempCard.getDescription());
+                ArrayNode colorsArray = cardNode.putArray("colors");
+                for (int k = 0; k < tempCard.getColors().size(); k++) {
+                    colorsArray.add(tempCard.getColors().get(k));
                 }
-                if (errorMsg == NO_4) {
-                    errorStr = "Attacker card has already attacked this turn.";
-                }
-                if (errorMsg == NO_3) {
-                    errorStr = "Attacked card is not of type 'Tank'.";
-                }
-                newNode.put("error", errorStr);
+                cardNode.put("name", tempCard.getName());
+                break;
             }
-        }
-        if (actionsInput.getCommand().equals("cardUsesAbility")) {
-            int xAttacker = actionsInput.getCardAttacker().getX();
-            int yAttacker = actionsInput.getCardAttacker().getY();
-            int xAttacked = actionsInput.getCardAttacked().getX();
-            int yAttacked = actionsInput.getCardAttacked().getY();
-
-            if (yAttacker + 1 > table.getVectorRows()[xAttacker].size()) {
-                return;
-            }
-            if (yAttacked + 1 > table.getVectorRows()[xAttacked].size()) {
-                return;
-            }
-            Minion attackerCard = table.getVectorRows()[xAttacker].get(yAttacker);
-            Minion attackedCard = table.getVectorRows()[xAttacked].get(yAttacked);
-
-            int errorMsg = attackerCard.useAbility(attackedCard, xAttacked);
-            if (errorMsg != 0) {
+            case "useEnvironmentCard" -> {
+                int handIndex = actionsInput.getHandIdx();
+                int affectedRow = actionsInput.getAffectedRow();
+                int whichPlayer = playerTurn;
+                int errorNo = table.useEnvironmentCard(handIndex, affectedRow, whichPlayer);
+                if (errorNo == 0) {
+                    return;
+                }
                 ObjectNode newNode = outputData.addObject();
                 newNode.put("command", actionsInput.getCommand());
-                ObjectNode attackerNode = newNode.putObject("cardAttacker");
-                attackerNode.put("x", actionsInput.getCardAttacker().getX());
-                attackerNode.put("y", actionsInput.getCardAttacker().getY());
-                ObjectNode attackedNode = newNode.putObject("cardAttacked");
-                attackedNode.put("x", actionsInput.getCardAttacked().getX());
-                attackedNode.put("y", actionsInput.getCardAttacked().getY());
-                String errorStr = null;
-                if (errorMsg == 1) {
-                    errorStr = "Attacker card is frozen.";
-                }
-                if (errorMsg == 2) {
-                    errorStr = "Attacker card has already attacked this turn.";
-                }
-                if (errorMsg == NO_3) {
-                    errorStr = "Attacked card does not belong to the current player.";
-                }
-                if (errorMsg == NO_4) {
-                    errorStr = "Attacked card does not belong to the enemy.";
-                }
-                if (errorMsg == NO_5) {
-                    errorStr = "Attacked card is not of type 'Tank'.";
-                }
-                newNode.put("error", errorStr);
-            }
-        }
-        if (actionsInput.getCommand().equals("useAttackHero")) {
-
-            int xAttacker = actionsInput.getCardAttacker().getX();
-            int yAttacker = actionsInput.getCardAttacker().getY();
-
-            Minion attackerCard = table.getVectorRows()[xAttacker].get(yAttacker);
-
-            int errorMsg = useHeroAttack(attackerCard);
-            if (errorMsg == 1 || errorMsg == 2 || errorMsg == NO_3) {
-                ObjectNode newNode = outputData.addObject();
-                newNode.put("command", actionsInput.getCommand());
-                ObjectNode attackerNode = newNode.putObject("cardAttacker");
-                attackerNode.put("x", actionsInput.getCardAttacker().getX());
-                attackerNode.put("y", actionsInput.getCardAttacker().getY());
-                String errorStr = null;
-                if (errorMsg == 1) {
-                    errorStr = "Attacker card is frozen.";
-                }
-                if (errorMsg == 2) {
-                    errorStr = "Attacker card has already attacked this turn.";
-                }
-                if (errorMsg == NO_3) {
-                    errorStr = "Attacked card is not of type 'Tank'.";
-                }
-                newNode.put("error", errorStr);
-            }
-            if (errorMsg == NO_4 || errorMsg == NO_5) {
-                gameEnded = 1;
-                ObjectNode newNode = outputData.addObject();
-                if (errorMsg == NO_4) {
-                    newNode.put("gameEnded", "Player one killed the enemy hero.");
-                    player1.incrementGamesWon();
-                    gamesPlayed = gamesPlayed + 1;
-                }
-                if (errorMsg == NO_5) {
-                    newNode.put("gameEnded", "Player two killed the enemy hero.");
-                    player2.incrementGamesWon();
-                    gamesPlayed = gamesPlayed + 1;
-                }
-            }
-        }
-        if (actionsInput.getCommand().equals("useHeroAbility")) {
-            int attackedRow = actionsInput.getAffectedRow();
-
-            Hero currentHero = null;
-            Player currentPlayer = null;
-            if (playerTurn == 1) {
-                currentHero = table.getHero1();
-                currentPlayer = player1;
-            } else {
-                currentHero = table.getHero2();
-                currentPlayer = player2;
-            }
-            int errorMsg = currentHero.heroAbility(attackedRow, currentPlayer);
-            if (errorMsg != 0) {
-                ObjectNode newNode = outputData.addObject();
-                newNode.put("command", actionsInput.getCommand());
+                newNode.put("handIdx", actionsInput.getHandIdx());
                 newNode.put("affectedRow", actionsInput.getAffectedRow());
-                String errString = null;
-                if (errorMsg == 1) {
-                    errString = "Not enough mana to use hero's ability.";
+                String errorMsg = null;
+                if (errorNo == 1) {
+                    errorMsg = "Chosen card is not of type environment.";
                 }
-                if (errorMsg == 2) {
-                    errString = "Hero has already attacked this turn.";
+                if (errorNo == 2) {
+                    errorMsg = "Not enough mana to use environment card.";
                 }
-                if (errorMsg == NO_3) {
-                    errString = "Selected row does not belong to the enemy.";
+                if (errorNo == NO_3) {
+                    errorMsg = "Chosen row does not belong to the enemy.";
                 }
-                if (errorMsg == NO_4) {
-                    errString = "Selected row does not belong to the current player.";
+                if (errorNo == NO_4) {
+                    errorMsg = "Cannot steal enemy card since the player's row is full.";
                 }
-                newNode.put("error", errString);
+                newNode.put("error", errorMsg);
+                break;
             }
-        }
-        if (actionsInput.getCommand().equals("getPlayerOneWins")) {
-            int whichPlayer = 1;
-            int gamesWon = getPlayerWins(whichPlayer);
-            ObjectNode newNode = outputData.addObject();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("output", gamesWon);
-        }
-        if (actionsInput.getCommand().equals("getPlayerTwoWins")) {
-            int whichPlayer = 2;
-            int gamesWon = getPlayerWins(whichPlayer);
-            ObjectNode newNode = outputData.addObject();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("output", gamesWon);
-        }
-        if (actionsInput.getCommand().equals("getTotalGamesPlayed")) {
-            ObjectNode newNode = outputData.addObject();
-            newNode.put("command", actionsInput.getCommand());
-            newNode.put("output", gamesPlayed);
+            case "getFrozenCardsOnTable" -> {
+                ObjectNode newNode = outputData.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                ArrayNode outputArray = newNode.putArray("output");
+                for (int i = 0; i < table.getVectorRows().length; i++) {
+                    for (int j = 0; j < table.getVectorRows()[i].size(); j++) {
+                        CardInput tempCard = table.getVectorRows()[i].get(j).getCard();
+                        if (table.getVectorRows()[i].get(j).getIsFrozen() == 1) {
+                            ObjectNode cardNode = outputArray.addObject();
+                            cardNode.put("mana", tempCard.getMana());
+                            cardNode.put("attackDamage", table.getVectorRows()[i].get(j).getDamage());
+                            cardNode.put("health", table.getVectorRows()[i].get(j).getHealth());
+
+                            cardNode.put("description", tempCard.getDescription());
+                            ArrayNode colorsArray = cardNode.putArray("colors");
+                            for (int k = 0; k < tempCard.getColors().size(); k++) {
+                                colorsArray.add(tempCard.getColors().get(k));
+                            }
+                            cardNode.put("name", tempCard.getName());
+                        }
+                    }
+                }
+                break;
+            }
+            case "cardUsesAttack" -> {
+
+                int xAttacker = actionsInput.getCardAttacker().getX();
+                int yAttacker = actionsInput.getCardAttacker().getY();
+                int xAttacked = actionsInput.getCardAttacked().getX();
+                int yAttacked = actionsInput.getCardAttacked().getY();
+
+                Minion attackerMinion = table.getVectorRows()[xAttacker].get(yAttacker);
+                Minion attackedMinion = table.getVectorRows()[xAttacked].get(yAttacked);
+                int errorMsg = useAttack(attackerMinion, attackedMinion, xAttacked);
+
+                if (errorMsg != 0) {
+                    ObjectNode newNode = outputData.addObject();
+                    newNode.put("command", actionsInput.getCommand());
+                    ObjectNode attackerNode = newNode.putObject("cardAttacker");
+                    attackerNode.put("x", actionsInput.getCardAttacker().getX());
+                    attackerNode.put("y", actionsInput.getCardAttacker().getY());
+                    ObjectNode attackedNode = newNode.putObject("cardAttacked");
+                    attackedNode.put("x", actionsInput.getCardAttacked().getX());
+                    attackedNode.put("y", actionsInput.getCardAttacked().getY());
+                    String errorStr = null;
+                    if (errorMsg == 1) {
+                        errorStr = "Attacked card does not belong to the enemy.";
+                    }
+                    if (errorMsg == 2) {
+                        errorStr = "Attacker card is frozen.";
+                    }
+                    if (errorMsg == NO_4) {
+                        errorStr = "Attacker card has already attacked this turn.";
+                    }
+                    if (errorMsg == NO_3) {
+                        errorStr = "Attacked card is not of type 'Tank'.";
+                    }
+                    newNode.put("error", errorStr);
+                }
+                break;
+            }
+            case "cardUsesAbility" -> {
+                int xAttacker = actionsInput.getCardAttacker().getX();
+                int yAttacker = actionsInput.getCardAttacker().getY();
+                int xAttacked = actionsInput.getCardAttacked().getX();
+                int yAttacked = actionsInput.getCardAttacked().getY();
+
+                if (yAttacker + 1 > table.getVectorRows()[xAttacker].size()) {
+                    return;
+                }
+                if (yAttacked + 1 > table.getVectorRows()[xAttacked].size()) {
+                    return;
+                }
+                Minion attackerCard = table.getVectorRows()[xAttacker].get(yAttacker);
+                Minion attackedCard = table.getVectorRows()[xAttacked].get(yAttacked);
+
+                int errorMsg = attackerCard.useAbility(attackedCard, xAttacked);
+                if (errorMsg != 0) {
+                    ObjectNode newNode = outputData.addObject();
+                    newNode.put("command", actionsInput.getCommand());
+                    ObjectNode attackerNode = newNode.putObject("cardAttacker");
+                    attackerNode.put("x", actionsInput.getCardAttacker().getX());
+                    attackerNode.put("y", actionsInput.getCardAttacker().getY());
+                    ObjectNode attackedNode = newNode.putObject("cardAttacked");
+                    attackedNode.put("x", actionsInput.getCardAttacked().getX());
+                    attackedNode.put("y", actionsInput.getCardAttacked().getY());
+                    String errorStr = null;
+                    if (errorMsg == 1) {
+                        errorStr = "Attacker card is frozen.";
+                    }
+                    if (errorMsg == 2) {
+                        errorStr = "Attacker card has already attacked this turn.";
+                    }
+                    if (errorMsg == NO_3) {
+                        errorStr = "Attacked card does not belong to the current player.";
+                    }
+                    if (errorMsg == NO_4) {
+                        errorStr = "Attacked card does not belong to the enemy.";
+                    }
+                    if (errorMsg == NO_5) {
+                        errorStr = "Attacked card is not of type 'Tank'.";
+                    }
+                    newNode.put("error", errorStr);
+                }
+                break;
+            }
+            case "useAttackHero" -> {
+
+                int xAttacker = actionsInput.getCardAttacker().getX();
+                int yAttacker = actionsInput.getCardAttacker().getY();
+
+                Minion attackerCard = table.getVectorRows()[xAttacker].get(yAttacker);
+
+                int errorMsg = useHeroAttack(attackerCard);
+                if (errorMsg == 1 || errorMsg == 2 || errorMsg == NO_3) {
+                    ObjectNode newNode = outputData.addObject();
+                    newNode.put("command", actionsInput.getCommand());
+                    ObjectNode attackerNode = newNode.putObject("cardAttacker");
+                    attackerNode.put("x", actionsInput.getCardAttacker().getX());
+                    attackerNode.put("y", actionsInput.getCardAttacker().getY());
+                    String errorStr = null;
+                    if (errorMsg == 1) {
+                        errorStr = "Attacker card is frozen.";
+                    }
+                    if (errorMsg == 2) {
+                        errorStr = "Attacker card has already attacked this turn.";
+                    }
+                    if (errorMsg == NO_3) {
+                        errorStr = "Attacked card is not of type 'Tank'.";
+                    }
+                    newNode.put("error", errorStr);
+                }
+                if (errorMsg == NO_4 || errorMsg == NO_5) {
+                    gameEnded = 1;
+                    ObjectNode newNode = outputData.addObject();
+                    if (errorMsg == NO_4) {
+                        newNode.put("gameEnded", "Player one killed the enemy hero.");
+                        player1.incrementGamesWon();
+                        gamesPlayed = gamesPlayed + 1;
+                    }
+                    if (errorMsg == NO_5) {
+                        newNode.put("gameEnded", "Player two killed the enemy hero.");
+                        player2.incrementGamesWon();
+                        gamesPlayed = gamesPlayed + 1;
+                    }
+                }
+                break;
+            }
+            case "useHeroAbility" -> {
+                int attackedRow = actionsInput.getAffectedRow();
+
+                Hero currentHero = null;
+                Player currentPlayer = null;
+                if (playerTurn == 1) {
+                    currentHero = table.getHero1();
+                    currentPlayer = player1;
+                } else {
+                    currentHero = table.getHero2();
+                    currentPlayer = player2;
+                }
+                int errorMsg = currentHero.heroAbility(attackedRow, currentPlayer);
+                if (errorMsg != 0) {
+                    ObjectNode newNode = outputData.addObject();
+                    newNode.put("command", actionsInput.getCommand());
+                    newNode.put("affectedRow", actionsInput.getAffectedRow());
+                    String errString = null;
+                    if (errorMsg == 1) {
+                        errString = "Not enough mana to use hero's ability.";
+                    }
+                    if (errorMsg == 2) {
+                        errString = "Hero has already attacked this turn.";
+                    }
+                    if (errorMsg == NO_3) {
+                        errString = "Selected row does not belong to the enemy.";
+                    }
+                    if (errorMsg == NO_4) {
+                        errString = "Selected row does not belong to the current player.";
+                    }
+                    newNode.put("error", errString);
+                }
+                break;
+            }
+            case "getPlayerOneWins" -> {
+                int whichPlayer = 1;
+                int gamesWon = getPlayerWins(whichPlayer);
+                ObjectNode newNode = outputData.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("output", gamesWon);
+                break;
+            }
+            case "getPlayerTwoWins" -> {
+                int whichPlayer = 2;
+                int gamesWon = getPlayerWins(whichPlayer);
+                ObjectNode newNode = outputData.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("output", gamesWon);
+                break;
+            }
+            case "getTotalGamesPlayed" -> {
+                ObjectNode newNode = outputData.addObject();
+                newNode.put("command", actionsInput.getCommand());
+                newNode.put("output", gamesPlayed);
+                break;
+            }
         }
     }
 
     // some auxiliary functions
     /**
-     *
      * @param whichPLayer the player whose turn currently is
      * @return the number which corresponds to the output error
      */
-    private int getPlayerWins(int whichPLayer) {
+    private int getPlayerWins(final int whichPLayer) {
         Player player = null;
         if (whichPLayer == 1) {
             player = player1;
@@ -676,14 +692,11 @@ public class Gameplay {
     }
 
     /**
-     *
-     * @param minionAttacks the minion who attacks
-     * @param attackedCard the minion who is attacked
      * @param xAttacked the row where is the attacked minion
      * @return the number which corresponds to the output error
      */
-    private int useAttack(Minion minionAttacks, Minion attackedCard, int xAttacked) {
-
+    private int useAttack(final Minion minionAttacks, final Minion attackedCard,
+                          final int xAttacked) {
         // verify if the attacked card belongs to the attacker
         int whichPlayer = playerTurn;
         int enemyPlayer = NO_3 - whichPlayer;
@@ -732,11 +745,9 @@ public class Gameplay {
     }
 
     /**
-     *
-     * @param attackerCard the minion who is attacks the hero
      * @return the number which corresponds to the output error
      */
-    private int useHeroAttack(Minion attackerCard) {
+    private int useHeroAttack(final Minion attackerCard) {
         if (attackerCard.getIsFrozen() == 1) {
             return 1; // error : Attacker card is frozen.
         }
@@ -805,10 +816,9 @@ public class Gameplay {
     }
 
     /**
-     *
      * @param playerTurn the player whose turn currently is
      */
-    private void unfrozeCards(int playerTurn) {
+    private void unfrozeCards(final int playerTurn) {
         int playerFirstRow = NO_4 - (2 * playerTurn);
         for (int i = playerFirstRow; i <= playerFirstRow + 1; i++) {
             for (int j = 0; j < table.getVectorRows()[i].size(); j++) {

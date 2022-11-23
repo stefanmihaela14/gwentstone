@@ -8,30 +8,24 @@ import lombok.Setter;
 @Setter
 public class Minion extends MyCard {
 
-    public void MinionRules() {
-
-    }
-
     protected int health = 0;
 
     protected int damage = 0;
 
-    protected int AttackedOnceThisRound = 0; // after it attacks becomes 1
+    protected int AttackedOnceThisRound = 0;
 
     protected int hasUsedSpecialAbility = 0;
 
     /**
-     *
-     * @param card ?? an instance of the minion card
+     * @param card The card's input data.
      */
-    public Minion(CardInput card) {
+    public Minion(final CardInput card) {
         super(card);
         this.health = card.getHealth();
         this.damage = card.getAttackDamage();
     }
 
     /**
-     *
      * @return true if the card is type of Environment card and false if not
      */
     @Override
@@ -41,25 +35,22 @@ public class Minion extends MyCard {
 
     /**
      * does not do anything here because not all minions have abilities
-     * @param attackedCard the attacked card
      * @param attackedX the row where the attacked card is
-     * @return he number which corresponds to the output error
+     * @return the number which corresponds to the output error
      */
-    public int useAbility(Minion attackedCard, int attackedX) {
+    public int useAbility(final Minion attackedCard, final int attackedX) {
         return 0;
     }
 
     //getter and setters
     /**
      *
-     * @param damage the minion's damage
      */
-    public void setDamage(int damage) {
+    public void setDamage(final int damage) {
         this.damage = damage;
     }
 
     /**
-     *
      * @return the minion's damage
      */
     public int getDamage() {
@@ -67,15 +58,13 @@ public class Minion extends MyCard {
     }
 
     /**
-     *
      * @param health the minion's health
      */
-    public void setHealth(int health) {
+    public void setHealth(final int health) {
         this.health = health;
     }
 
     /**
-     *
      * @return get the minion's health
      */
     public int getHealth() {
@@ -83,7 +72,6 @@ public class Minion extends MyCard {
     }
 
     /**
-     *
      * @return  1 if it has attacked that round and 0 otherwise
      */
     public int getAttackedOnceThisRound() {
@@ -91,11 +79,10 @@ public class Minion extends MyCard {
     }
 
     /**
-     *
-     * @param AttackedOnceThisRound we set the value to know
+     * @param hasAttackedOnceThisRound we set the value to know
      * if the hero has attacked this round or not
      */
-    public void setAttackedOnceThisRound(int AttackedOnceThisRound) {
-        this.AttackedOnceThisRound = AttackedOnceThisRound;
+    public void setAttackedOnceThisRound(final int hasAttackedOnceThisRound) {
+        this.AttackedOnceThisRound = hasAttackedOnceThisRound;
     }
 }

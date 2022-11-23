@@ -14,7 +14,6 @@ public class Environment extends MyCard {
     public static final int NO_3 = 3;
 
     /**
-     *
      * @return true if the card is type of Environment card and false if not
      */
     @Override
@@ -23,10 +22,9 @@ public class Environment extends MyCard {
     }
 
     /**
-     *
-     * @param card ????
+     * @param card The card's input data.
      */
-    public Environment(CardInput card) {
+    public Environment(final CardInput card) {
         super(card);
     }
 
@@ -35,7 +33,7 @@ public class Environment extends MyCard {
      * to later use it in Gameplay
      * @param affectedRow the row attacked
      */
-    public void useAbility(int affectedRow) {
+    public void useAbility(final int affectedRow) {
         ArrayList<Minion> auxTable = Gameplay.getInstance().getTable().getVectorRows()[affectedRow];
         if (card.getName().equals("Firestorm")) {
             for (int i = 0; i < auxTable.size(); i++) {

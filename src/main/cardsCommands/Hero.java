@@ -12,15 +12,13 @@ import main.Table;
 public class Hero extends MyCard {
 
     /**
-     *
-     * @param card ????
+     * @param card The hero's input data.
      */
-    public Hero(CardInput card) {
+    public Hero(final CardInput card) {
         super(card);
     }
 
     /**
-     *
      * @return true if the card is type of Environment card and false if not
      */
     @Override
@@ -31,7 +29,6 @@ public class Hero extends MyCard {
     protected int attackedOnceThisRound = 0;
 
     /**
-     *
      * @return 1 if it has attacked that round and 0 otherwise
      */
     public int getAttackedOnceThisRound() {
@@ -39,11 +36,10 @@ public class Hero extends MyCard {
     }
 
     /**
-     *
      * @param attackedOnceThisRound we set the value to know
      * if the hero has attacked this round or not
      */
-    public void setAttackedOnceThisRound(int attackedOnceThisRound) {
+    public void setAttackedOnceThisRound(final int attackedOnceThisRound) {
         this.attackedOnceThisRound = attackedOnceThisRound;
     }
 
@@ -56,7 +52,6 @@ public class Hero extends MyCard {
     private int health = HEALTH_START;
 
     /**
-     *
      * @return the hero's health
      */
     public int getHealth() {
@@ -64,20 +59,18 @@ public class Hero extends MyCard {
     }
 
     /**
-     *
      * @param health the new health of the hero
      */
-    public void setHealth(int health) {
+    public void setHealth(final int health) {
         this.health = health;
     }
 
     /**
-     *
-     * @param attackedRow the row that the hero has attacked
-     * @param player ?? an instance of the player who uses the hero
+     * verify which hero is and make the logic for its ability
+     * @param player an instance of the player who uses the hero
      * @return the number which corresponds to the output error
      */
-    public int heroAbility(int attackedRow, Player player) {
+    public int heroAbility(final int attackedRow, final Player player) {
         Table table = Gameplay.getInstance().getTable();
         int attackedCardPosition = -1;
 

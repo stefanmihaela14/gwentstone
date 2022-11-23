@@ -19,20 +19,18 @@ public class SpecialAbilityMinion extends Minion {
     public static final int NO_5 = 5;
 
     /**
-     *
-     * @param card
+     * @param card The card's input data.
      */
-    public SpecialAbilityMinion(CardInput card) {
+    public SpecialAbilityMinion(final CardInput card) {
         super(card);
     }
 
     /**
-     *
-     * @param attackedCard
-     * @param attackedX
-     * @return
+     * verify which special minion it is and make the logic for its ability
+     * @param attackedX the row where the attacked card is
+     * @return the number which corresponds to the output error
      */
-    public int useAbility(Minion attackedCard, int attackedX) {
+    public int useAbility(final Minion attackedCard, final int attackedX) {
         Table table = Gameplay.getInstance().getTable();
 
         if (getIsFrozen() == 1) {

@@ -1,6 +1,5 @@
 package main.cardsCommands;
 
-import fileio.ActionsInput;
 import fileio.CardInput;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +12,6 @@ public abstract class MyCard {
     protected int isFrozen = 0;
 
     /**
-     *
      * @return 1 if the card is frozen and 0 otherwise
      */
     public int getIsFrozen() {
@@ -21,30 +19,26 @@ public abstract class MyCard {
     }
 
     /**
-     *
-     * @param isFrozen we set the card's frozen propriety to 1 if it's frozen or 0 otherwise
+     * @param isFrozen 1 if frozen and 0 otherwise
      */
-    public void setIsFrozen(int isFrozen) {
+    public void setIsFrozen(final int isFrozen) {
         this.isFrozen = isFrozen;
     }
 
     /**
-     *
-     * @param card ???
+     * @param card The card's input data.
      */
-    public MyCard(CardInput card) {
+    public MyCard(final CardInput card) {
         this.card = card;
     }
 
     /**
-     *
      * @return true if the card is type of Environment card and false if not
      */
     public abstract boolean isEnvironmentCard();
 
     /**
-     *
-     * @return ??
+     * @return Gets the card's input data.
      */
     public CardInput getCard() {
         return card;
