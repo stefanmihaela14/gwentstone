@@ -1,0 +1,76 @@
+Stefan Mihaela 322CA
+
+-------------------------------- GwentStone ----------------------------------
+
+* General implemantation: *
+
+    The flow is Main -> call GameRules -> call doActions -> call methods from 
+Gameplay class -> particular methods from other classes (Minion, Table, etc).
+
+    Made a MyCard abstract class and then extended other cards (Minion
+-extended by SpecialAbilityMinion-, Environment and Hero). 
+
+------------------------------------------------------------------------------
+* Classes: *
+
+- Main: * All that's done in the Main class is that a Gameplay instance is
+got and then the game is run using it (by calling its gameRules method).
+
+- Gameplay: * The main method is gameRules where we verify if a game has
+            ended, whose turn it is, update the playe's fields (mana, games
+            won), shuffle the decks, use methods from the following classes
+            to make the table, heroes, cards in hand, decks, increase the
+            mana after the instructions and execute the commands.
+            * Then, in doActions we take every action separatly, verify the
+            errors and write the output in JSON. Some of them use methods
+            implemented in the respective classes(e.g. placeCard uses 
+            putCardOnTable from Table). In doAction I prepare the parameters to call 
+            useAttack where I verify the errors and implement the attacks
+            itself, it works the same for useAttackHero. But for a card's
+            ability the logic is in SpecialAbilityMinion/Hero and in doActions
+            I just write in JSON the errors and output.
+
+- Table: * has the table (an array - representing the rows of the table - 
+           of ArrayLists - containing the cards on each row-), the heroes, the players 
+           decks and the players' hands with cards.
+         * a little confusing because in method table we make the 'layout' for
+           the table and also make our own decks for the players, not to
+           modify the original ones and in this class we also make the
+           useEnvironmentCard method (the only reason its here it is because
+           at that time I tought it would be easier to acces table directly
+           from here).
+
+- Player: * keeps a pleyer's mana, the games they won, decrements the mana and
+            increments the won games.
+
+The package cardsCommands contains:
+
+- MyCard: * abstract class, made as a basse for all the other cards.
+          * keeps the status of frozen cards and the cards input (type of 
+           CardInput).
+
+- Minion: * extends MyCard
+          * keeps the health and damage because these are the fields from the
+            input data that we will change during the game and keeps track if
+            the card has attacked this round or has it used its special
+            ability.
+
+- SpecialAbilityMinion: *extends Minion, but implements the useAbility method.
+
+
+- Environment: * extends MyCard, but implements the useAbility method.
+
+- Hero: * extends MyCard, but implements the heroAbility method.
+
+------------------------------------------------------------------------------
+Problems during the homework:
+
+- Didn't realize how I should organize my code according to OOP standards from
+the beginning so part of the code is not that well modularized and a some
+fragments are a bit repetitive.
+
+Note:
+
+Cool homework idea, but even though on OCW it says that getters and setters do not
+need javaDocs, the codingstyle checker didn't approve and so I had to make
+JavaDocs which I coudn't leve empty.
